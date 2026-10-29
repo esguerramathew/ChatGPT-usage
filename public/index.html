@@ -35,6 +35,15 @@
     <form id="form">
       <div class="section-title"><h2 id="form-title">Add account</h2><button type="button" id="close" class="close-button" aria-label="Close">×</button></div>
       <label>Name<input id="name" maxlength="60" placeholder="Personal" required autocomplete="off"></label>
+      <label>Email <span class="optional">optional</span><input id="email" type="email" maxlength="254" placeholder="you@example.com" autocomplete="off" autocapitalize="none" spellcheck="false"></label>
+      <fieldset class="color-picker"><legend>Color</legend>
+        <label class="color-option"><input type="radio" name="color" value="blue" checked><span class="swatch color-blue"></span><span class="sr-only">Blue</span></label>
+        <label class="color-option"><input type="radio" name="color" value="green"><span class="swatch color-green"></span><span class="sr-only">Green</span></label>
+        <label class="color-option"><input type="radio" name="color" value="purple"><span class="swatch color-purple"></span><span class="sr-only">Purple</span></label>
+        <label class="color-option"><input type="radio" name="color" value="orange"><span class="swatch color-orange"></span><span class="sr-only">Orange</span></label>
+        <label class="color-option"><input type="radio" name="color" value="pink"><span class="swatch color-pink"></span><span class="sr-only">Pink</span></label>
+        <label class="color-option"><input type="radio" name="color" value="slate"><span class="swatch color-slate"></span><span class="sr-only">Slate</span></label>
+      </fieldset>
       <label>Next reset<input id="anchor" type="datetime-local" required></label>
       <p class="hint">Use the time shown in ChatGPT. Local time.</p>
       <button type="submit" class="wide">Save</button>

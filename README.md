@@ -39,3 +39,5 @@ Verify real delivery by adding a reminder a few minutes in the future and closin
 ## Validation
 
 `npm test` checks five-hour boundaries, late delivery, and recovery across missed cycles. Local HTTP smoke checks exercise static assets and API validation. Push delivery requires testing from a supported installed browser on the final HTTPS origin.
+
+Account cards support optional email labels and six colors. Active accounts sort by their next reset; paused accounts appear last. Email labels are stored on the device and synced to the same backend storage as reminders. They do not sign into ChatGPT or receive email notifications, and are not included in push notification text. Existing reminders work without these fields.

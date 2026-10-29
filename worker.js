@@ -1,3 +1,4 @@
+import { validAccountDetails } from './public/accounts.js';
 import webpush from 'web-push';
 import { createECDH } from 'node:crypto';
 import { dueSlot, nextReset } from './schedule.js';
@@ -8,7 +9,7 @@ export function validSubscription(s) {
   try { const u=new URL(s.endpoint); return u.protocol==='https:' && !u.port && !u.username && !u.password && /^(web\.push\.apple\.com|[a-z0-9-]+\.push\.apple\.com|fcm\.googleapis\.com|updates\.push\.services\.mozilla\.com|[a-z0-9.-]+\.notify\.windows\.com)$/.test(u.hostname) && ['p256dh','auth'].every(k=>typeof s.keys[k]==='string' && /^[A-Za-z0-9_-]{16,200}$/.test(s.keys[k])); } catch { return false; }
 }
 export function validateReminders(rows,now=Date.now()) {
-  return Array.isArray(rows) && rows.length<=30 && new Set(rows.map(r=>r?.id)).size===rows.length && rows.every(r=>r && typeof r.id==='string' && r.id.length>0 && r.id.length<=80 && typeof r.name==='string' && r.name.trim() && r.name.length<=60 && Number.isSafeInteger(r.anchor) && r.anchor>=0 && r.anchor<=now+366*86400000 && typeof r.paused==='boolean');
+  return Array.isArray(rows) && rows.length<=30 && new Set(rows.map(r=>r?.id)).size===rows.length && rows.every(r=>r && validAccountDetails(r) && typeof r.id==='string' && r.id.length>0 && r.id.length<=80 && typeof r.name==='string' && r.name.trim() && r.name.length<=60 && Number.isSafeInteger(r.anchor) && r.anchor>=0 && r.anchor<=now+366*86400000 && typeof r.paused==='boolean');
 }
 export function wakeTime(rows,now) {return Math.min(NEVER,...rows.filter(r=>!r.paused).map(r=>nextReset(r.anchor,now)));}
 function pushError(code,message){const error=new Error(message);error.safeMessage=message;error.code=code;return error;}
@@ -62,7 +63,7 @@ async function handle(request,env) {
   if(route==='/api/reminders') {
     if(!validateReminders(input.reminders))return reply(400,{error:'Invalid reminders'});
     const now=Date.now(),old=JSON.parse(client.reminders);
-    const rows=input.reminders.map(r=>({id:r.id,name:r.name.trim(),anchor:r.anchor,paused:r.paused,last:old.find(o=>o.id===r.id && o.anchor===r.anchor)?.last??dueSlot(r.anchor,now)}));
+    const rows=input.reminders.map(r=>({id:r.id,name:r.name.trim(),email:r.email||'',color:r.color||'blue',anchor:r.anchor,paused:r.paused,last:old.find(o=>o.id===r.id && o.anchor===r.anchor)?.last??dueSlot(r.anchor,now)}));
     // Preserve a pending due slot when a browser sync overlaps the scheduled trigger.
     const due=Math.min(NEVER,...rows.filter(r=>!r.paused).map(r=>{const slot=dueSlot(r.anchor,now);return slot!==null && (r.last===null || slot>r.last)?slot:nextReset(r.anchor,now);}));
     await env.DB.prepare('UPDATE clients SET reminders=?, next_due=?, version=version+1 WHERE token=?').bind(JSON.stringify(rows),due,token).run();

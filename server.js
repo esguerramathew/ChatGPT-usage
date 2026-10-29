@@ -1,3 +1,4 @@
+import { validAccountDetails } from './public/accounts.js';
 import http from 'node:http';
 import { readFile, mkdir, writeFile, rename } from 'node:fs/promises';
 import { randomBytes } from 'node:crypto';
@@ -21,7 +22,7 @@ function validSubscription(s) {
   try { const u=new URL(s.endpoint); return u.protocol==='https:' && !u.port && !u.username && !u.password && /^(web\.push\.apple\.com|.*\.push\.apple\.com|fcm\.googleapis\.com|updates\.push\.services\.mozilla\.com|.*\.notify\.windows\.com)$/.test(u.hostname) && ['p256dh','auth'].every(k=>typeof s.keys[k]==='string' && /^[A-Za-z0-9_-]{16,200}$/.test(s.keys[k])); } catch { return false; }
 }
 const types={'.html':'text/html','.js':'text/javascript','.css':'text/css','.webmanifest':'application/manifest+json','.svg':'image/svg+xml'};
-const files=new Set(['index.html','app.js','style.css','sw.js','manifest.webmanifest','icon.svg']);
+const files=new Set(['index.html','accounts.js','app.js','style.css','sw.js','manifest.webmanifest','icon.svg']);
 const server=http.createServer(async(req,res)=>{
   res.setHeader('X-Content-Type-Options','nosniff');
   res.setHeader('Referrer-Policy','no-referrer');
@@ -45,8 +46,8 @@ const server=http.createServer(async(req,res)=>{
         }
         const client=Object.hasOwn(clients,token)?clients[token]:null; if(!client) return json(res,401,{error:'Enable notifications again to reconnect this device'});
         if(pathname==='/api/reminders') {
-          if(!Array.isArray(input.reminders) || input.reminders.length>30 || input.reminders.some(r=>!r || typeof r.id!=='string' || r.id.length>80 || typeof r.name!=='string' || !r.name.trim() || r.name.length>60 || !Number.isSafeInteger(r.anchor) || r.anchor<0 || r.anchor>Date.now()+366*86400000 || typeof r.paused!=='boolean')) return json(res,400,{error:'Invalid reminders'});
-          client.reminders=input.reminders.map(r=>{const old=client.reminders.find(o=>o.id===r.id && o.anchor===r.anchor); return {id:r.id,name:r.name,anchor:r.anchor,paused:r.paused,last:old?.last??dueSlot(r.anchor,Date.now())};});
+          if(!Array.isArray(input.reminders) || input.reminders.length>30 || input.reminders.some(r=>!r || !validAccountDetails(r) || typeof r.id!=='string' || r.id.length>80 || typeof r.name!=='string' || !r.name.trim() || r.name.length>60 || !Number.isSafeInteger(r.anchor) || r.anchor<0 || r.anchor>Date.now()+366*86400000 || typeof r.paused!=='boolean')) return json(res,400,{error:'Invalid reminders'});
+          client.reminders=input.reminders.map(r=>{const old=client.reminders.find(o=>o.id===r.id && o.anchor===r.anchor); return {id:r.id,name:r.name,email:r.email||'',color:r.color||'blue',anchor:r.anchor,paused:r.paused,last:old?.last??dueSlot(r.anchor,Date.now())};});
           client.updated=Date.now(); await save('clients.json',clients); return json(res,200,{ok:true});
         }
         if(pathname==='/api/test') { await webpush.sendNotification(client.subscription,JSON.stringify({title:'Notifications are ready',body:'Your five-hour reminders will arrive here.',tag:'test'}),{TTL:300,timeout:10000}); return json(res,200,{ok:true}); }
