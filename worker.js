@@ -26,7 +26,7 @@ export function buildPush(env,subscription,payload) {
 async function send(env,subscription,payload) {
   const details=buildPush(env,subscription,payload);
   let response;
-  try{response=await fetch(details.endpoint,{method:details.method,headers:details.headers,body:details.body,redirect:'error',signal:AbortSignal.timeout(10000)});}
+  try{response=await fetch(details.endpoint,{method:details.method,headers:details.headers,body:details.body,redirect:'manual',signal:AbortSignal.timeout(10000)});}
   catch(error){throw pushError('PUSH_NETWORK',error.name==='TimeoutError'?'The push service timed out. Try again shortly.':'The server could not connect to the push service. Please report error code PUSH_NETWORK.');}
   await response.body?.cancel();
   if(!response.ok) {const error=new Error('Push delivery failed');error.status=response.status;throw error;}
