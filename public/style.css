@@ -165,3 +165,28 @@ body:has(.undo-bar:not([hidden])) main{padding-bottom:calc(100px + env(safe-area
 @media(hover:hover) and (pointer:fine){.card:not(.is-near):hover{box-shadow:0 5px 9px #15213d0a,0 18px 28px -12px #15213d55}.card .actions .text:hover{background:#edf1f8}.card-summary:hover .card-expand{background:#ffffff35}}
 @media(max-width:359px){.card-summary{padding:22px 18px 16px}.card-details{padding:18px 18px 8px}.card h3{font-size:15px}.pill{font-size:9px}.card-top{gap:8px}}
 @media(prefers-reduced-motion:reduce){.card.is-near::after{animation:none;opacity:.25}.card[open] .card-details{animation:none}}
+/* Sideways, overlapping deck with a readable selected card. */
+main{max-width:850px}
+#accounts{display:flex;align-items:flex-start;gap:0;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;padding:34px 26px 42px;margin:0 -22px;scroll-padding-inline:26px;isolation:isolate;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+#accounts::-webkit-scrollbar{display:none}
+#accounts .card{flex:0 0 min(290px,calc(100vw - 88px));min-width:0;scroll-snap-align:center;rotate:-8deg;transform-origin:center 75%;transition:rotate .35s cubic-bezier(.2,.8,.2,1),box-shadow .25s;box-shadow:0 9px 14px -10px #12204966,0 18px 30px -17px #12204955}
+#accounts .card + .card{margin-left:-120px}
+#accounts .card[open]{rotate:0deg;z-index:3;box-shadow:0 12px 28px -12px #12204955}
+#accounts .card:focus-within{z-index:4}
+#accounts .card-summary{padding:22px 18px 16px}
+#accounts .timer{font-size:43px;letter-spacing:-2px;margin-top:32px}
+#accounts .card h3{font-size:15px}
+#accounts .account-avatar{width:32px;height:38px;font-size:16px}
+#accounts .card-top{gap:8px}
+#accounts .pill{font-size:9px;padding:6px}
+#accounts .card-details{padding:18px 18px 8px}
+#accounts .card::before{inset:0 4px -5px}
+#accounts .card.is-near{box-shadow:0 0 0 2px var(--account-color),0 0 24px -3px var(--account-color)}
+#accounts .empty{flex:1;margin:0 0 -15px}
+#accounts:has(.card:only-child){justify-content:center}
+#accounts .card:only-child{rotate:0deg}
+.deck-nav{display:flex;align-items:center;justify-content:center;gap:26px;margin:-5px 0 18px}
+.deck-nav button{background:#e7eaf1;color:#344569;border-radius:50%;width:44px;padding:0;font-size:20px}
+#deck-position{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;min-width:40px;text-align:center}
+@media(min-width:700px){#accounts{padding:45px 40px 50px;scroll-padding-inline:40px}#accounts .card{flex-basis:300px}#accounts .card + .card{margin-left:-110px}}
+@media(prefers-reduced-motion:reduce){#accounts .card{transition:none}}

@@ -16,8 +16,9 @@
       <div><p class="app-label">RESET</p><h1>Accounts</h1></div>
       <button id="add" class="add-button" aria-label="Add account">+</button>
     </header>
-    <div class="section-title"><span>Tap a card for details</span><span id="count">0</span></div>
-    <div id="accounts"></div>
+    <div class="section-title"><span>Swipe to browse · Tap to open</span><span id="count">0</span></div>
+    <div id="accounts" aria-label="Account card deck"></div>
+    <nav class="deck-nav" aria-label="Browse accounts" hidden><button id="previous-card" class="text" aria-label="Previous account">←</button><span id="deck-position"></span><button id="next-card" class="text" aria-label="Next account">→</button></nav>
     <details class="setup" id="notification-settings">
       <summary><span>Notifications <span id="notification-state" class="notification-state"></span></span><span class="disclosure" aria-hidden="true">⌄</span></summary>
       <div class="setup-content">
