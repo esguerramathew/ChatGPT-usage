@@ -109,3 +109,13 @@ details[open] .setup-content{animation:reveal-settings .25s ease-out}
 @keyframes card-orbit{from{opacity:0;transform:rotate(-45deg) scale(.85)}to{opacity:.45;transform:rotate(-25deg) scale(1)}}
 .card.is-paused .card-art{animation:none;opacity:.18}
 @media(prefers-reduced-motion:reduce){.card-art{animation:none}}
+.notification-state{font-size:11px;font-weight:400;color:var(--muted);margin-left:8px}
+.form-error{font-size:13px;line-height:1.5;color:#a32435;margin:12px 0}
+.form-error:empty{display:none}
+input[aria-invalid=true]{border-color:#a32435;outline-color:#a32435}
+.undo-bar{position:fixed;z-index:5;bottom:calc(18px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:556px;display:flex;align-items:center;gap:8px;background:#202127;color:#fff;border:1px solid #42434a;border-radius:16px;padding:8px 12px 8px 18px;box-shadow:0 8px 25px #0003}
+#undo-message{flex:1;font-size:13px;overflow-wrap:anywhere;min-width:0}
+.undo-bar button{background:transparent;color:#b9d0ff;flex:none;padding:10px}
+#dismiss-undo{color:#fff;font-size:22px;width:44px}
+body:has(.undo-bar:not([hidden])) main{padding-bottom:calc(100px + env(safe-area-inset-bottom))}
+#retry{padding-left:0}
