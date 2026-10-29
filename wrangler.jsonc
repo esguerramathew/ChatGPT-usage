@@ -3,8 +3,28 @@
   "name": "reset-reminder",
   "main": "worker.js",
   "compatibility_date": "2026-01-01",
-  "compatibility_flags": ["nodejs_compat"],
-  "assets": { "directory": "./public", "binding": "ASSETS", "run_worker_first": ["/api/*"] },
-  "triggers": { "crons": ["* * * * *"] },
-  "d1_databases": [{ "binding": "DB", "database_name": "reset-reminders", "database_id": "2f35253a-e4ea-43fe-bc0a-e4d8cba6bc2a", "migrations_dir": "migrations" }]
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": [
+      "/api/*"
+    ]
+  },
+  "triggers": {
+    "crons": [
+      "* * * * *"
+    ]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "reset-reminders",
+      "database_id": "2f35253a-e4ea-43fe-bc0a-e4d8cba6bc2a",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "keep_vars": true
 }
