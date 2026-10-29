@@ -1,4 +1,5 @@
 import webpush from 'web-push';
+import { createECDH } from 'node:crypto';
 import { dueSlot, nextReset } from './schedule.js';
 const NEVER=8640000000000000;
 const reply=(status,data)=>Response.json(data,{status,headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
@@ -10,12 +11,23 @@ export function validateReminders(rows,now=Date.now()) {
   return Array.isArray(rows) && rows.length<=30 && new Set(rows.map(r=>r?.id)).size===rows.length && rows.every(r=>r && typeof r.id==='string' && r.id.length>0 && r.id.length<=80 && typeof r.name==='string' && r.name.trim() && r.name.length<=60 && Number.isSafeInteger(r.anchor) && r.anchor>=0 && r.anchor<=now+366*86400000 && typeof r.paused==='boolean');
 }
 export function wakeTime(rows,now) {return Math.min(NEVER,...rows.filter(r=>!r.paused).map(r=>nextReset(r.anchor,now)));}
+function pushError(code,message){const error=new Error(message);error.safeMessage=message;error.code=code;return error;}
 export function buildPush(env,subscription,payload) {
-  return webpush.generateRequestDetails(subscription,JSON.stringify(payload),{TTL:600,vapidDetails:{subject:env.VAPID_SUBJECT,publicKey:env.VAPID_PUBLIC_KEY,privateKey:env.VAPID_PRIVATE_KEY}});
+  const publicKey=env.VAPID_PUBLIC_KEY,privateKey=env.VAPID_PRIVATE_KEY;
+  if(typeof publicKey!=='string' || !/^[A-Za-z0-9_-]{87}$/.test(publicKey))throw pushError('PUBLIC_KEY_FORMAT','VAPID_PUBLIC_KEY must contain only the 87-character public key. Check for spaces or a copied label in Cloudflare.');
+  if(typeof privateKey!=='string' || !/^[A-Za-z0-9_-]{43}$/.test(privateKey))throw pushError('PRIVATE_KEY_FORMAT','VAPID_PRIVATE_KEY must contain only the 43-character private key. Check for spaces or a copied label in Cloudflare.');
+  const curve=createECDH('prime256v1');
+  try{curve.setPrivateKey(Buffer.from(privateKey,'base64url'));}catch{throw pushError('PRIVATE_KEY_INVALID','The saved VAPID_PRIVATE_KEY is invalid. Recopy it from the original key generator output.');}
+  if(curve.getPublicKey().toString('base64url')!==publicKey)throw pushError('KEY_PAIR_MISMATCH','The saved public and private VAPID keys do not match. Copy both from the same key generator output.');
+  try{const subject=new URL(env.VAPID_SUBJECT);if(!['mailto:','https:'].includes(subject.protocol))throw Error();}catch{throw pushError('SUBJECT_INVALID','VAPID_SUBJECT must be a valid mailto: email address or HTTPS URL. Check its value in Cloudflare.');}
+  try{return webpush.generateRequestDetails(subscription,JSON.stringify(payload),{TTL:600,vapidDetails:{subject:env.VAPID_SUBJECT,publicKey,privateKey}});}
+  catch{throw pushError('ENCRYPTION_FAILED','Notification encryption failed. Please report error code ENCRYPTION_FAILED.');}
 }
 async function send(env,subscription,payload) {
   const details=buildPush(env,subscription,payload);
-  const response=await fetch(details.endpoint,{method:details.method,headers:details.headers,body:details.body,redirect:'error',signal:AbortSignal.timeout(10000)});
+  let response;
+  try{response=await fetch(details.endpoint,{method:details.method,headers:details.headers,body:details.body,redirect:'error',signal:AbortSignal.timeout(10000)});}
+  catch(error){throw pushError('PUSH_NETWORK',error.name==='TimeoutError'?'The push service timed out. Try again shortly.':'The server could not connect to the push service. Please report error code PUSH_NETWORK.');}
   await response.body?.cancel();
   if(!response.ok) {const error=new Error('Push delivery failed');error.status=response.status;throw error;}
 }
@@ -59,11 +71,11 @@ async function handle(request,env) {
   if(route==='/api/test'){
     try{await send(env,JSON.parse(client.subscription),{title:'Notifications are ready',body:'Your five-hour reminders will arrive here.',tag:'test'});return reply(200,{ok:true});}
     catch(error){
-      const message=[404,410].includes(error.status)?'This notification subscription has expired. Tap Enable notifications to reconnect.':
+      const message=error.safeMessage || ([404,410].includes(error.status)?'This notification subscription has expired. Tap Enable notifications to reconnect.':
         [401,403].includes(error.status)?'The push service rejected notification authentication. Check that the public and private VAPID keys in Cloudflare are a matching pair.':
         error.status?`The push service rejected the test (HTTP ${error.status}). Please report this code.`:
-        'The server could not prepare or send the notification. Check Cloudflare Worker logs for the error type.';
-      console.error('Test notification failed:',error.status||error.name);return reply(502,{error:message});
+        'The server could not prepare the notification. Please report this error and check Worker logs.');
+      console.error('Test notification failed:',error.code||error.status||error.name);return reply(502,{error:message});
     }
   }
   return reply(404,{error:'Not found'});
