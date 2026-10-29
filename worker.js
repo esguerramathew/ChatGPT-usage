@@ -56,7 +56,16 @@ async function handle(request,env) {
     await env.DB.prepare('UPDATE clients SET reminders=?, next_due=?, version=version+1 WHERE token=?').bind(JSON.stringify(rows),due,token).run();
     return reply(200,{ok:true});
   }
-  if(route==='/api/test'){await send(env,JSON.parse(client.subscription),{title:'Notifications are ready',body:'Your five-hour reminders will arrive here.',tag:'test'});return reply(200,{ok:true});}
+  if(route==='/api/test'){
+    try{await send(env,JSON.parse(client.subscription),{title:'Notifications are ready',body:'Your five-hour reminders will arrive here.',tag:'test'});return reply(200,{ok:true});}
+    catch(error){
+      const message=[404,410].includes(error.status)?'This notification subscription has expired. Tap Enable notifications to reconnect.':
+        [401,403].includes(error.status)?'The push service rejected notification authentication. Check that the public and private VAPID keys in Cloudflare are a matching pair.':
+        error.status?`The push service rejected the test (HTTP ${error.status}). Please report this code.`:
+        'The server could not prepare or send the notification. Check Cloudflare Worker logs for the error type.';
+      console.error('Test notification failed:',error.status||error.name);return reply(502,{error:message});
+    }
+  }
   return reply(404,{error:'Not found'});
 }
 export async function runScheduled(env,now=Date.now()) {
