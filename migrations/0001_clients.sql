@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS clients (
+  token TEXT PRIMARY KEY,
+  endpoint TEXT NOT NULL UNIQUE,
+  subscription TEXT NOT NULL,
+  reminders TEXT NOT NULL DEFAULT '[]',
+  next_due INTEGER NOT NULL DEFAULT 8640000000000000,
+  lease_until INTEGER NOT NULL DEFAULT 0,
+  version INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS clients_due ON clients(next_due);

@@ -1,0 +1,21 @@
+{
+  "name": "reset-reminder",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test --test-isolation=none",
+    "dev:cloud": "wrangler dev --test-scheduled",
+    "deploy": "wrangler deploy",
+    "db:local": "wrangler d1 migrations apply reset-reminders --local",
+    "db:remote": "wrangler d1 migrations apply reset-reminders --remote",
+    "keys": "node scripts/create-secrets.js"
+  },
+  "dependencies": {
+    "web-push": "3.6.7"
+  },
+  "devDependencies": {
+    "wrangler": "^4.155.0"
+  }
+}
