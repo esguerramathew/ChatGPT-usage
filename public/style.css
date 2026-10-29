@@ -119,3 +119,49 @@ input[aria-invalid=true]{border-color:#a32435;outline-color:#a32435}
 #dismiss-undo{color:#fff;font-size:22px;width:44px}
 body:has(.undo-bar:not([hidden])) main{padding-bottom:calc(100px + env(safe-area-inset-bottom))}
 #retry{padding-left:0}
+/* Expandable cards, inspired by a colorful card deck. */
+.color-blue{--card-start:#285bdc;--card-end:#407ef0;--card-ink:#fff;--account-color:#376beb}
+.color-green{--card-start:#087b65;--card-end:#15a68d;--card-ink:#fff;--account-color:#0f9b80}
+.color-purple{--card-start:#6832bd;--card-end:#9855e1;--card-ink:#fff;--account-color:#8542d4}
+.color-orange{--card-start:#b7500d;--card-end:#e17c24;--card-ink:#fff;--account-color:#cf681c}
+.color-pink{--card-start:#b32369;--card-end:#df4590;--card-ink:#fff;--account-color:#cd347d}
+.color-slate{--card-start:#3c4d69;--card-end:#667e9b;--card-ink:#fff;--account-color:#56708e}
+#accounts{gap:22px;padding:0 3px}
+.card{padding:0!important;border:0;background:#fff;overflow:visible;border-radius:22px;box-shadow:0 2px 3px #15213d0a,0 13px 22px -12px #15213d45;transition:box-shadow .25s;isolation:isolate}
+.card::before{content:'';position:absolute;z-index:-1;inset:0 6px -6px;border-radius:22px;background:var(--account-color);opacity:.18;transform:rotate(-1.2deg);pointer-events:none}
+.card:nth-child(even)::before{transform:rotate(1.2deg)}
+.card-summary{display:block;position:relative;overflow:hidden;isolation:isolate;min-height:0;padding:24px 24px 18px;border-radius:22px;background:linear-gradient(120deg,var(--card-start),var(--card-end));color:white;font-weight:400;outline-offset:5px}
+.card[open]>.card-summary{border-radius:22px 22px 0 0}
+.card-summary::-webkit-details-marker{display:none}
+.card-summary::marker{content:''}
+.card-top{display:flex;position:relative;z-index:1;gap:12px}
+.account-avatar{width:38px;height:42px;color:#fff;border:1px solid #ffffff55;background:#ffffff18;box-shadow:none}
+.card h3{font-size:17px;color:#fff;font-weight:600}
+.pill{color:#fff;font-size:10px;border:1px solid #ffffff45;background:#00000013;padding:6px 8px}
+.pill::before{background:#fff}
+.timer{display:block;color:#fff;font-size:clamp(42px,12vw,58px);margin:27px 0 8px;letter-spacing:-2px;line-height:1.05}
+.card-bottom{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.card-caption{font-size:11px;letter-spacing:.2px;color:#fff;opacity:.9}
+.card-expand{display:grid;place-items:center;border:1px solid #ffffff55;background:#ffffff15;border-radius:50%;width:29px;height:29px;font-size:20px;font-weight:300;transition:transform .25s}
+.card[open] .card-expand{transform:rotate(45deg)}
+.card-art{right:-55px;top:24px;width:220px;height:220px;opacity:.28}
+.card-art span{background:linear-gradient(135deg,#ffffff00,#ffffff20);border-color:#ffffff45;box-shadow:none}
+.card-details{padding:20px 24px 8px;border-radius:0 0 22px 22px;background:#fff;position:relative;z-index:1}
+.card[open] .card-details{animation:reveal-settings .25s ease-out}
+.card .account-email{font-size:13px;line-height:1.6;color:#343c4d;opacity:1;margin:0 0 5px}
+.card .reset-time{font-size:12px;line-height:1.6;color:#656b78;opacity:1;margin:0 0 16px}
+.card .actions{border-color:#e9ebf0;padding-top:6px}
+.card .actions .text{color:#344569;opacity:1}
+.card .actions .text:last-child{color:#8b4050}
+.card.is-paused{background:#fff;--card-start:#657084;--card-end:#8490a2;box-shadow:0 8px 18px -12px #15213d33}
+.card.is-paused .timer{color:#fff;font-size:42px;margin:27px 0 8px;line-height:1.05}
+.card.is-paused .pill::before{background:#dce1eb}
+.card.is-near{box-shadow:0 0 0 2px var(--account-color),0 0 26px -5px var(--account-color)}
+.card.is-near::after{content:'';position:absolute;inset:-2px;border-radius:24px;z-index:-1;pointer-events:none;box-shadow:0 0 32px 3px var(--account-color);opacity:.2;animation:reset-glow 3s ease-in-out infinite}
+.card.is-near .pill{background:#ffffffeb;color:#26324d;border-color:#fff;font-weight:650}
+.card.is-near .pill::before{background:var(--account-color)}
+@keyframes reset-glow{0%,100%{opacity:.15}50%{opacity:.55}}
+.page-hidden .card::after{animation-play-state:paused}
+@media(hover:hover) and (pointer:fine){.card:not(.is-near):hover{box-shadow:0 5px 9px #15213d0a,0 18px 28px -12px #15213d55}.card .actions .text:hover{background:#edf1f8}.card-summary:hover .card-expand{background:#ffffff35}}
+@media(max-width:359px){.card-summary{padding:22px 18px 16px}.card-details{padding:18px 18px 8px}.card h3{font-size:15px}.pill{font-size:9px}.card-top{gap:8px}}
+@media(prefers-reduced-motion:reduce){.card.is-near::after{animation:none;opacity:.25}.card[open] .card-details{animation:none}}
